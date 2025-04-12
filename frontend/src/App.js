@@ -26,10 +26,17 @@ function App() {
     
     const ext = selectedFile.name.toLowerCase().split('.').pop();
     
+    // Pass both the file path and directory context to the viewers
     if (ext === 'md') {
-      return <MarkdownViewer filePath={selectedFile.path} />;
+      return <MarkdownViewer 
+        filePath={selectedFile.name} 
+        dir={selectedFile.dir} 
+      />;
     } else if (ext === 'json') {
-      return <JsonViewer filePath={selectedFile.path} />;
+      return <JsonViewer 
+        filePath={selectedFile.name} 
+        dir={selectedFile.dir} 
+      />;
     }
     
     return <Typography>Unsupported file type</Typography>;

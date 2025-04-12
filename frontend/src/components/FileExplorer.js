@@ -95,8 +95,13 @@ function FileExplorer({ onFileSelect }) {
         : file.name;
       navigateToFolder(newPath);
     } else {
-      // If it's a file, select it
-      onFileSelect(file);
+      // If it's a file, select it with the current directory context
+      const fileWithContext = {
+        ...file,
+        dir: currentDir, // Add the current directory context
+        fullPath: currentDir ? `${currentDir}/${file.path}` : file.path
+      };
+      onFileSelect(fileWithContext);
     }
   };
 

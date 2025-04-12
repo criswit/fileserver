@@ -82,7 +82,7 @@ const PlantUMLDiagram = memo(({ value }) => {
   }
 });
 
-function MarkdownViewer({ filePath }) {
+function MarkdownViewer({ filePath, dir }) {
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -94,12 +94,19 @@ function MarkdownViewer({ filePath }) {
       setLoading(true);
       setError(null);
       try {
-        // Extract directory part from the path
-        const pathParts = filePath.split('/');
-        const fileName = pathParts.pop(); // Remove filename
-        const dir = pathParts.join('/'); // Directory context
+        // Use the directory context if provided, otherwise extract from path
+        let fileDir = dir;
+        let fileName = filePath;
         
-        const response = await axios.get(`/api/content/${fileName}?dir=${dir}`);
+        if (!fileDir) {
+          // Fall back to the old method if dir is not provided
+          const pathParts = filePath.split('/');
+          fileName = pathParts.pop(); // Remove filename
+          fileDir = pathParts.join('/'); // Directory context
+        }
+        
+        console.log(`Fetching markdown content: file=${fileName}, dir=${fileDir}`);
+        const response = await axios.get(`/api/content/${fileName}?dir=${fileDir}`);
         setContent(response.data);
       } catch (err) {
         console.error('Error fetching markdown content:', err);
@@ -110,7 +117,7 @@ function MarkdownViewer({ filePath }) {
     };
     
     fetchContent();
-  }, [filePath]);
+  }, [filePath, dir]); // Added dir to the dependency array
 
   // Components for ReactMarkdown
   const components = {

@@ -18,7 +18,7 @@ const ResultBox = styled(Box)(({ theme }) => ({
   position: 'relative',
 }));
 
-function JsonViewer({ filePath }) {
+function JsonViewer({ filePath, dir }) {
   const [content, setContent] = useState('');
   // Using parsedContent state variable for potential future features
   const [, setParsedContent] = useState(null);
@@ -36,12 +36,19 @@ function JsonViewer({ filePath }) {
       setLoading(true);
       setError(null);
       try {
-        // Extract directory part from the path
-        const pathParts = filePath.split('/');
-        const fileName = pathParts.pop(); // Remove filename
-        const dir = pathParts.join('/'); // Directory context
+        // Use the directory context if provided, otherwise extract from path
+        let fileDir = dir;
+        let fileName = filePath;
         
-        const response = await axios.get(`/api/content/${fileName}?dir=${dir}`);
+        if (!fileDir) {
+          // Fall back to the old method if dir is not provided
+          const pathParts = filePath.split('/');
+          fileName = pathParts.pop(); // Remove filename
+          fileDir = pathParts.join('/'); // Directory context
+        }
+        
+        console.log(`Fetching JSON content: file=${fileName}, dir=${fileDir}`);
+        const response = await axios.get(`/api/content/${fileName}?dir=${fileDir}`);
         
         // Format JSON for display
         const jsonData = typeof response.data === 'string' 
@@ -59,7 +66,7 @@ function JsonViewer({ filePath }) {
     };
     
     fetchContent();
-  }, [filePath]);
+  }, [filePath, dir]); // Added dir to the dependency array
 
   const handleQuerySubmit = async (e) => {
     e.preventDefault();
@@ -70,12 +77,19 @@ function JsonViewer({ filePath }) {
     setQueryResult(null);
     
     try {
-      // Extract directory part from the path
-      const pathParts = filePath.split('/');
-      const fileName = pathParts.pop(); // Remove filename
-      const dir = pathParts.join('/'); // Directory context
+      // Use the directory context if provided, otherwise extract from path
+      let fileDir = dir;
+      let fileName = filePath;
       
-      const response = await axios.get(`/api/query/?file=${fileName}&path=${jsonPath}&dir=${dir}`);
+      if (!fileDir) {
+        // Fall back to the old method if dir is not provided
+        const pathParts = filePath.split('/');
+        fileName = pathParts.pop(); // Remove filename
+        fileDir = pathParts.join('/'); // Directory context
+      }
+      
+      console.log(`Querying JSON: file=${fileName}, path=${jsonPath}, dir=${fileDir}`);
+      const response = await axios.get(`/api/query/?file=${fileName}&path=${jsonPath}&dir=${fileDir}`);
       setQueryResult(response.data);
     } catch (err) {
       console.error('JSON query error:', err);
